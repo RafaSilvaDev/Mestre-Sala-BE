@@ -8,16 +8,19 @@ import jakarta.persistence.Id;
 import lombok.Data;
 
 @Data
-@Entity
+@Entity(name = "room")
 public class Room {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "title")
+
+    @Column(name = "title", nullable = false)
     private String title;
-    @Column(name = "location")
+
+    @Column(name = "location", nullable = false)
     private String location;
-    @Column(name = "description")
+
+    @Column(name = "description", nullable = false)
     private String description;
 
     public void updateRoomObject(Room otherRoom) {

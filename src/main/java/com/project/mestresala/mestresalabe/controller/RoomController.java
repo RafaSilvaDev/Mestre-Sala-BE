@@ -38,8 +38,7 @@ public class RoomController {
             return ResponseHandler.generateResponse("O objeto não foi encontrado.",
                     HttpStatus.NOT_FOUND, null);
         }else{
-            return ResponseHandler.generateResponse("O objeto foi encontrado",
-                    HttpStatus.OK, room);
+            return ResponseEntity.ok().build();
         }
     }
 
@@ -58,9 +57,7 @@ public class RoomController {
                     HttpStatus.NOT_FOUND, null);
         }else{
             roomRepository.delete(room);
-            return ResponseHandler.generateResponse(
-                    "O objeto foi excluído com sucesso",
-                    HttpStatus.OK, room);
+            return ResponseEntity.noContent().build();
         }
     }
 
@@ -75,10 +72,8 @@ public class RoomController {
                     HttpStatus.NOT_FOUND, null);
         }else{
             room.updateRoomObject(roomDetails);
-            Room updatedPowerType = roomRepository.save(room);
-            return ResponseHandler.generateResponse(
-                    "O objeto foi atualizado com sucesso.",
-                    HttpStatus.OK, updatedPowerType);
+            roomRepository.save(room);
+            return ResponseEntity.noContent().build();
         }
 
 
