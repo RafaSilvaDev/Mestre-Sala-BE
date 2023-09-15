@@ -28,7 +28,10 @@ public class SecurityConfig {
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
             .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-            .requestMatchers(HttpMethod.POST, "/room").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.GET, "/reservation").hasRole("USER")
+            .requestMatchers(HttpMethod.POST, "/reservation").hasRole("USER")
+            .requestMatchers(HttpMethod.PUT, "/reservation").hasRole("USER")
+            .requestMatchers(HttpMethod.DELETE, "/reservation").hasRole("USER")
             .anyRequest().authenticated()
         )
         .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

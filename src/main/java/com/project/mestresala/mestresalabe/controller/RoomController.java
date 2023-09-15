@@ -35,10 +35,12 @@ public class RoomController {
     public ResponseEntity<Object> getRoomById(@PathVariable(value = "id") Long id){
         Room room = roomRepository.findById(id).orElse(null);
         if(room == null){
-            return ResponseHandler.generateResponse("O objeto não foi encontrado.",
+            return ResponseHandler.generateResponse("Object not found.",
                     HttpStatus.NOT_FOUND, null);
         }else{
-            return ResponseEntity.ok().build();
+            return ResponseHandler.generateResponse(
+                "",
+                HttpStatus.OK, room);
         }
     }
 
@@ -53,7 +55,7 @@ public class RoomController {
         Room room = roomRepository.findById(id).orElse(null);
         if(room == null){
             return ResponseHandler.generateResponse(
-                    "O objeto a ser excluído não foi encontrado.",
+                    "Object not found.",
                     HttpStatus.NOT_FOUND, null);
         }else{
             roomRepository.delete(room);
@@ -68,14 +70,12 @@ public class RoomController {
         Room room = roomRepository.findById(id).orElse(null);
         if(room == null){
             return ResponseHandler.generateResponse(
-                    "O objeto a ser atualizado não foi encontrado.",
+                    "Object not found.",
                     HttpStatus.NOT_FOUND, null);
         }else{
             room.updateRoomObject(roomDetails);
             roomRepository.save(room);
             return ResponseEntity.noContent().build();
         }
-
-
     }
 }
