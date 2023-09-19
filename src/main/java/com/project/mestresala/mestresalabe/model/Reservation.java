@@ -1,6 +1,7 @@
 package com.project.mestresala.mestresalabe.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.project.mestresala.mestresalabe.model.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,21 +23,19 @@ public class Reservation {
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
   @Column(name = "date")
-//  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="GMT-3")
   private Date date;
   @Column(name = "title")
   private String title;
   @Column(name = "begin")
-//  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="GMT-3")
   private Time begin;
   @Column(name = "end")
-//  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone="GMT-3")
   private Time end;
   @Column(name = "description")
   private String description;
 
   @OneToOne @JoinColumn(name = "owner", nullable = false)
-  private User owner;
+  @JsonIgnoreProperties({"password", "role", "enabled", "authorities", "accountNonExpired", "credentialsNonExpired", "accountNonLocked"})
+  private User user;
   @OneToOne @JoinColumn(name = "room", nullable = false)
   private Room room;
 
@@ -46,7 +45,7 @@ public class Reservation {
     this.setBegin(otherReservation.getBegin());
     this.setEnd(otherReservation.getEnd());
     this.setDescription(otherReservation.getDescription());
-    this.setOwner(otherReservation.getOwner());
+    this.setUser(otherReservation.getUser());
     this.setRoom(otherReservation.getRoom());
   }
 }

@@ -28,7 +28,8 @@ public class SecurityConfig {
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
             .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-            .requestMatchers(HttpMethod.GET, "/reservation").hasRole("USER")
+            .requestMatchers(HttpMethod.GET, "/auth/register").permitAll()
+            .requestMatchers(HttpMethod.GET, "/auth/users").permitAll()
             .requestMatchers(HttpMethod.POST, "/reservation").hasRole("USER")
             .requestMatchers(HttpMethod.PUT, "/reservation").hasRole("USER")
             .requestMatchers(HttpMethod.DELETE, "/reservation").hasRole("USER")
