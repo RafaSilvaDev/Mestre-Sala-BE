@@ -1,6 +1,5 @@
 package com.project.mestresala.mestresalabe.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.project.mestresala.mestresalabe.model.user.User;
 import jakarta.persistence.Column;
@@ -9,11 +8,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.Data;
 
 import java.sql.Time;
-import java.time.Instant;
+import java.time.LocalTime;
 import java.util.Date;
 
 @Data
@@ -27,16 +27,24 @@ public class Reservation {
   @Column(name = "title")
   private String title;
   @Column(name = "begin")
-  private Time begin;
+  private LocalTime begin;
   @Column(name = "end")
-  private Time end;
+  private LocalTime end;
   @Column(name = "description")
   private String description;
 
-  @OneToOne @JoinColumn(name = "owner", nullable = false)
-  @JsonIgnoreProperties({"password", "role", "enabled", "authorities", "accountNonExpired", "credentialsNonExpired", "accountNonLocked"})
+  @ManyToOne
+  @JoinColumn(name = "owner", nullable = false)
+  @JsonIgnoreProperties({
+      "password",
+      "role",
+      "enabled",
+      "authorities",
+      "accountNonExpired",
+      "credentialsNonExpired",
+      "accountNonLocked"})
   private User user;
-  @OneToOne @JoinColumn(name = "room", nullable = false)
+  @ManyToOne @JoinColumn(name = "room", nullable = false)
   private Room room;
 
   public void updateReservationObject(Reservation otherReservation) {
