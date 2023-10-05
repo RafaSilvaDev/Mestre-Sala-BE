@@ -1,11 +1,18 @@
 package com.project.mestresala.mestresalabe.controller;
 
 import com.project.mestresala.mestresalabe.config.TokenService;
+import com.project.mestresala.mestresalabe.model.Room;
 import com.project.mestresala.mestresalabe.model.user.AuthenticationDTO;
 import com.project.mestresala.mestresalabe.model.user.LoginResponseDTO;
 import com.project.mestresala.mestresalabe.model.user.RegisterDTO;
 import com.project.mestresala.mestresalabe.model.user.User;
 import com.project.mestresala.mestresalabe.repository.UserRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@Tag(name = "User Auth")
 @RequestMapping("/auth")
 @CrossOrigin
 public class AuthenticationController {
@@ -35,6 +43,13 @@ public class AuthenticationController {
   @Autowired
   private TokenService tokenService;
 
+  @Operation(summary = "Login a user.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200",
+          content = {@Content(mediaType = "application/json",
+              schema = @Schema(implementation = LoginResponseDTO.class))}),
+      @ApiResponse(responseCode = "403", description = "Incorrect email or password.",
+          content = @Content)})
   @PostMapping("/login")
   public ResponseEntity login(@RequestBody @Valid AuthenticationDTO data) {
     var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
@@ -45,6 +60,11 @@ public class AuthenticationController {
     return ResponseEntity.ok(new LoginResponseDTO(token));
   }
 
+  @Operation(summary = "Register a user.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "201"),
+      @ApiResponse(responseCode = "409", description = "Field must not be null.",
+          content = @Content)})
   @PostMapping("/register")
   public ResponseEntity register(@RequestBody @Valid RegisterDTO data) {
     if(this.userRepository.findByEmail(data.email()) != null) return ResponseEntity.badRequest().build();
@@ -56,6 +76,7 @@ public class AuthenticationController {
     return ResponseEntity.ok().build();
   }
 
+  @Operation(summary = "Get all users", deprecated = true)
   @GetMapping("/users")
   public List<User> getUsers() {
     return userRepository.findAll();
