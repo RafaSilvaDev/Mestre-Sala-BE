@@ -2,6 +2,7 @@ package com.project.mestresala.mestresalabe.controller;
 
 import com.project.mestresala.mestresalabe.model.Room;
 import com.project.mestresala.mestresalabe.services.RoomService;
+import com.project.mestresala.mestresalabe.util.Constants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,7 +29,8 @@ import java.util.List;
 @RequestMapping("/room")
 public class RoomController {
 
-  @Autowired private RoomService roomService;
+  @Autowired
+  private RoomService roomService;
 
   @Operation(summary = "Get all rooms available")
   @ApiResponses(value = {
@@ -46,7 +48,7 @@ public class RoomController {
       @ApiResponse(responseCode = "200",
           content = {@Content(mediaType = "application/json",
               schema = @Schema(implementation = Room.class))}),
-      @ApiResponse(responseCode = "404", description = "Room not found",
+      @ApiResponse(responseCode = "404", description = Constants.ROOM_NOT_FOUND,
           content = @Content)})
   @GetMapping("/{id}")
   @ResponseStatus(HttpStatus.OK)
@@ -73,7 +75,7 @@ public class RoomController {
       @ApiResponse(responseCode = "204"),
       @ApiResponse(responseCode = "403", description = "Access denied. Login required.",
           content = @Content),
-      @ApiResponse(responseCode = "404", description = "Room not found.",
+      @ApiResponse(responseCode = "404", description = Constants.ROOM_NOT_FOUND,
           content = @Content)})
   @SecurityRequirement(name = "bearerAuth")
   @DeleteMapping("/{id}")
@@ -87,7 +89,7 @@ public class RoomController {
       @ApiResponse(responseCode = "204"),
       @ApiResponse(responseCode = "403", description = "Access denied. Login required.",
           content = @Content),
-      @ApiResponse(responseCode = "404", description = "Room not found.",
+      @ApiResponse(responseCode = "404", description = Constants.ROOM_NOT_FOUND,
           content = @Content),
       @ApiResponse(responseCode = "400", description = "All fields must not be null to update a Room object.",
           content = @Content)})

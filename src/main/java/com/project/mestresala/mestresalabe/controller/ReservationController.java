@@ -4,6 +4,7 @@ import com.project.mestresala.mestresalabe.model.Reservation;
 import com.project.mestresala.mestresalabe.model.Room;
 import com.project.mestresala.mestresalabe.repository.ReservationRepository;
 import com.project.mestresala.mestresalabe.response.ResponseHandler;
+import com.project.mestresala.mestresalabe.services.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -34,6 +36,8 @@ import java.util.List;
 public class ReservationController {
   @Autowired
   private ReservationRepository reservationRepository;
+  @Autowired
+  private ReservationService reservationService;
 
   @Operation(summary = "Get all reservations")
   @ApiResponses(value = {
@@ -41,8 +45,9 @@ public class ReservationController {
           content = {@Content(mediaType = "application/json",
               schema = @Schema(implementation = Room.class))})})
   @GetMapping
-  public ResponseEntity<Object> getReservations() {
-    return ResponseEntity.ok(reservationRepository.findAll());
+  @ResponseStatus(HttpStatus.OK)
+  public List<Reservation> getReservations() {
+    return reservationService.getAllReservations();
   }
 
   @Operation(summary = "Get a reservation by it's id.")
@@ -53,14 +58,9 @@ public class ReservationController {
       @ApiResponse(responseCode = "404", description = "Reservation not found.",
           content = @Content)})
   @GetMapping("/{id}")
-  public ResponseEntity<Object> getReservationById(@PathVariable(value = "id") Long id) {
-    Reservation reservation = reservationRepository.findById(id).orElse(null);
-    if(reservation == null) {
-      return ResponseHandler.generateResponse("Reservation not found.",
-          HttpStatus.NOT_FOUND, null);
-    } else {
-      return ResponseEntity.ok(reservation);
-    }
+  @ResponseStatus(HttpStatus.OK)
+  public Reservation getReservationById(@PathVariable(value = "id") Long id) {
+    return reservationService.getReservationById(id);
   }
 
   @Operation(summary = "Create a reservations")
@@ -74,33 +74,9 @@ public class ReservationController {
           content = @Content)})
   @SecurityRequirement(name = "bearerAuth")
   @PostMapping
-  public ResponseEntity<Object> createReservation(@RequestBody Reservation reservation) {
-    List<Reservation> existingReservations = reservationRepository
-        .findByRoomAndDate(reservation.getRoom(), reservation.getDate());
-    boolean overlap = existingReservations.stream()
-        .anyMatch(existing -> doReservationsOverlap(existing, reservation));
-    if (overlap) {
-      return ResponseHandler.generateResponse(
-          "Time inserted overlaps an existing reservation.",
-          HttpStatus.BAD_REQUEST, null);
-    } else {
-      Reservation savedReservation = reservationRepository.save(reservation);
-      URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-          .path("/{id}")
-          .buildAndExpand(savedReservation.getId())
-          .toUri();
-      return ResponseEntity.created(location).build();
-    }
-  }
-
-  private boolean doReservationsOverlap(Reservation existing, Reservation newReservation) {
-    LocalTime existingBegin = existing.getBegin();
-    LocalTime existingEnd = existing.getEnd();
-    LocalTime newBegin = newReservation.getBegin();
-    LocalTime newEnd = newReservation.getEnd();
-
-    return !(existingEnd.isBefore(newBegin) || existingBegin.isAfter(newEnd) ||
-            existingEnd.equals(newBegin) || existingBegin.equals(newEnd));
+  @ResponseStatus(HttpStatus.CREATED)
+  public void createReservation(@RequestBody Reservation reservation) {
+    reservationService.createReservation(reservation);
   }
 
   @Operation(summary = "Delete a reservation")
@@ -110,37 +86,24 @@ public class ReservationController {
           content = @Content)})
   @SecurityRequirement(name = "bearerAuth")
   @DeleteMapping("/{id}")
-  public ResponseEntity<Object> deleteReservation(@PathVariable(value = "id") Long id){
-    Reservation reservation = reservationRepository.findById(id).orElse(null);
-    if(reservation == null){
-      return ResponseHandler.generateResponse(
-          "Reservation not found.",
-          HttpStatus.NOT_FOUND, null);
-    }else{
-      reservationRepository.delete(reservation);
-      return ResponseEntity.noContent().build();
-    }
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void deleteReservation(@PathVariable(value = "id") Long id) {
+    reservationService.deleteReservationById(id);
   }
 
   @Operation(summary = "Update a reservation")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "204"),
       @ApiResponse(responseCode = "404", description = "Reservation not found.",
+          content = @Content),
+      @ApiResponse(responseCode = "400", description = "All fields must not be null to update a Reservation object.",
           content = @Content)})
   @SecurityRequirement(name = "bearerAuth")
   @PutMapping("/{id}")
-  public ResponseEntity<Object> updateReservation(
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void updateReservation(
       @PathVariable(value = "id") Long id,
-      @RequestBody Reservation reservationDetails){
-    Reservation reservation = reservationRepository.findById(id).orElse(null);
-    if(reservation == null){
-      return ResponseHandler.generateResponse(
-          "Reservation not found.",
-          HttpStatus.NOT_FOUND, null);
-    }else{
-      reservation.updateReservationObject(reservationDetails);
-      reservationRepository.save(reservation);
-      return ResponseEntity.noContent().build();
-    }
+      @RequestBody Reservation reservationDetails) {
+    reservationService.updateRoom(id, reservationDetails);
   }
 }
