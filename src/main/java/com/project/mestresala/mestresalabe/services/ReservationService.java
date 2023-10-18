@@ -8,8 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -43,11 +45,6 @@ public class ReservationService {
     }
   }
 
-  private String formatTime(LocalTime time) {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-    return time.format(formatter);
-  }
-
 
   public Reservation getReservationById(Long id) {
     Reservation reservation = reservationRepository
@@ -63,6 +60,7 @@ public class ReservationService {
   }
 
   public void createReservation(Reservation reservationToCreate) {
+    reservationToCreate.setDate(addOneDay(reservationToCreate.getDate()));
     List<Reservation> existingReservations = reservationRepository
         .findByRoomAndDate(reservationToCreate.getRoom(), reservationToCreate.getDate());
     boolean overlap = existingReservations.stream()
@@ -73,6 +71,14 @@ public class ReservationService {
         "Time inserted overlaps an existing reservation."
     );
     else reservationRepository.save(reservationToCreate);
+  }
+
+  private Date addOneDay(Date date)
+  {
+    Calendar cal = Calendar.getInstance();
+    cal.setTime(date);
+    cal.add(Calendar.DATE, 1);
+    return cal.getTime();
   }
 
   public void deleteReservationById(Long id) {
