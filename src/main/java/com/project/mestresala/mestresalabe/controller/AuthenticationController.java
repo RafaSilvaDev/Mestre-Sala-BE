@@ -1,14 +1,12 @@
 package com.project.mestresala.mestresalabe.controller;
 
 import com.project.mestresala.mestresalabe.config.TokenService;
-import com.project.mestresala.mestresalabe.model.Room;
 import com.project.mestresala.mestresalabe.model.user.AuthenticationDTO;
 import com.project.mestresala.mestresalabe.model.user.LoginResponseDTO;
 import com.project.mestresala.mestresalabe.model.user.RegisterDTO;
 import com.project.mestresala.mestresalabe.model.user.User;
 import com.project.mestresala.mestresalabe.model.user.UserEmailDTO;
 import com.project.mestresala.mestresalabe.repository.UserRepository;
-import com.project.mestresala.mestresalabe.services.AuthorizationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -67,17 +65,32 @@ public class AuthenticationController {
   @Operation(summary = "Register a user.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "201"),
-      @ApiResponse(responseCode = "409", description = "Field must not be null.",
+      @ApiResponse(responseCode = "400", description = "Field must not be null.",
           content = @Content)})
   @PostMapping("/register")
-  public ResponseEntity register(@RequestBody @Valid RegisterDTO data) {
-    if(this.userRepository.findByEmail(data.email()) != null) return ResponseEntity.badRequest().build();
+  @ResponseStatus(HttpStatus.CREATED)
+  public void register(@RequestBody @Valid RegisterDTO data) {
+    if(this.userRepository.findByEmail(data.email()) != null)
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "All fields must not be null."
+      );
 
     String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
     User newUser = new User(data.fullName(), data.email(), encryptedPassword, data.role());
 
     this.userRepository.save(newUser);
-    return ResponseEntity.ok().build();
+  }
+
+  @Operation(summary = "Verify User token.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200"),
+      @ApiResponse(responseCode = "400", description = "Token is invalid or expired.",
+          content = @Content)})
+  @PostMapping("/verify")
+  @ResponseStatus(HttpStatus.OK)
+  public void verifyToken(@RequestBody String token) {
+    tokenService.isTokenValid(token);
   }
 
   @Operation(summary = "Get all users.", deprecated = true)
