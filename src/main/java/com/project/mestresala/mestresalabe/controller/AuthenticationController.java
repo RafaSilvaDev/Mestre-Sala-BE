@@ -6,7 +6,9 @@ import com.project.mestresala.mestresalabe.model.user.AuthenticationDTO;
 import com.project.mestresala.mestresalabe.model.user.LoginResponseDTO;
 import com.project.mestresala.mestresalabe.model.user.RegisterDTO;
 import com.project.mestresala.mestresalabe.model.user.User;
+import com.project.mestresala.mestresalabe.model.user.UserEmailDTO;
 import com.project.mestresala.mestresalabe.repository.UserRepository;
+import com.project.mestresala.mestresalabe.services.AuthorizationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,9 +21,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -76,9 +80,16 @@ public class AuthenticationController {
     return ResponseEntity.ok().build();
   }
 
-  @Operation(summary = "Get all users", deprecated = true)
+  @Operation(summary = "Get all users.", deprecated = true)
   @GetMapping("/users")
   public List<User> getUsers() {
     return userRepository.findAll();
+  }
+
+  @Operation(summary = "Get a user by it's email.", deprecated = true)
+  @GetMapping("/user/{email}")
+  public Long getUserIdByEmail(@PathVariable(value = "email") UserEmailDTO data) {
+    System.out.println("User -> " + data.email());
+    return ((User) userRepository.findByEmail(data.email())).getId();
   }
 }

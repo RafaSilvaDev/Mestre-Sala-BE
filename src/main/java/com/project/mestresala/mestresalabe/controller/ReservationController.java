@@ -27,7 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -39,18 +42,18 @@ public class ReservationController {
   @Autowired
   private ReservationService reservationService;
 
-  @Operation(summary = "Get all reservations")
+  @Operation(summary = "Get all reservations by date")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200",
           content = {@Content(mediaType = "application/json",
-              schema = @Schema(implementation = Room.class))})})
-  @GetMapping
+              schema = @Schema(implementation = Reservation.class))})})
+  @GetMapping("/{date}")
   @ResponseStatus(HttpStatus.OK)
-  public List<Reservation> getReservations() {
-    return reservationService.getAllReservations();
+  public List<Reservation> getReservations(@PathVariable(value = "date") String date) {
+    return reservationService.getAllReservationsByDate(date);
   }
 
-  @Operation(summary = "Get a reservation by it's id.")
+  /*@Operation(summary = "Get a reservation by it's id.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200",
           content = {@Content(mediaType = "application/json",
@@ -61,7 +64,7 @@ public class ReservationController {
   @ResponseStatus(HttpStatus.OK)
   public Reservation getReservationById(@PathVariable(value = "id") Long id) {
     return reservationService.getReservationById(id);
-  }
+  }*/
 
   @Operation(summary = "Create a reservations")
   @ApiResponses(value = {
@@ -104,6 +107,6 @@ public class ReservationController {
   public void updateReservation(
       @PathVariable(value = "id") Long id,
       @RequestBody Reservation reservationDetails) {
-    reservationService.updateRoom(id, reservationDetails);
+    reservationService.updateReservation(id, reservationDetails);
   }
 }

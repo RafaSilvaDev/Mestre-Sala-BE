@@ -7,7 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -26,9 +29,25 @@ public class ReservationService {
         existingEnd.equals(newBegin) || existingBegin.equals(newEnd));
   }
 
-  public List<Reservation> getAllReservations() {
-    return reservationRepository.findAll();
+  public List<Reservation> getAllReservationsByDate(String date) {
+    try {
+      SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+      Date dateToFilter = format.parse(date);
+
+      return reservationRepository.findByDate(dateToFilter);
+    } catch (Exception exception) {
+      throw new ResponseStatusException(
+          HttpStatus.NOT_FOUND,
+          "Reservation not found. " + exception
+      );
+    }
   }
+
+  private String formatTime(LocalTime time) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    return time.format(formatter);
+  }
+
 
   public Reservation getReservationById(Long id) {
     Reservation reservation = reservationRepository
@@ -65,7 +84,7 @@ public class ReservationService {
     else reservationRepository.delete(reservation);
   }
 
-  public void updateRoom(Long id, Reservation updatedReservation) {
+  public void updateReservation(Long id, Reservation updatedReservation) {
     Reservation reservation = reservationRepository.findById(id).orElse(null);
     if (reservation == null)
       throw new ResponseStatusException(

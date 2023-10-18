@@ -13,4 +13,6 @@ import java.util.List;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
   @Query("SELECT r FROM reservation r WHERE r.room = :room AND r.date = :date")
   List<Reservation> findByRoomAndDate(Room room, Date date);
+  @Query("SELECT r FROM reservation r WHERE r.date = :date ")
+  List<Reservation> findByDate(Date date);
 }

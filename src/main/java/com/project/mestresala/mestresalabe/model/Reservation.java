@@ -1,5 +1,6 @@
 package com.project.mestresala.mestresalabe.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.project.mestresala.mestresalabe.model.user.User;
 import jakarta.persistence.Column;
@@ -22,12 +23,15 @@ public class Reservation {
 
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   @Column(name = "date")
   private Date date;
   @Column(name = "title")
   private String title;
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
   @Column(name = "begin")
   private LocalTime begin;
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
   @Column(name = "end")
   private LocalTime end;
   @Column(name = "description")
