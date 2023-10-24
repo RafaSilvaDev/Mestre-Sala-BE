@@ -38,8 +38,6 @@ import java.util.List;
 @RequestMapping("/reservation")
 public class ReservationController {
   @Autowired
-  private ReservationRepository reservationRepository;
-  @Autowired
   private ReservationService reservationService;
 
   @Operation(summary = "Get all reservations by date")

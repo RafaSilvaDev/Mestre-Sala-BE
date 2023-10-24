@@ -4,6 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 .idea/vcs.xml
+.env
 
 ### STS ###
 .apt_generated
@@ -32,3 +33,4 @@ build/
 
 ### VS Code ###
 .vscode/
+/.env
