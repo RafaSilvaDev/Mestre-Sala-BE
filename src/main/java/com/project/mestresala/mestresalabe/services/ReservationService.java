@@ -8,9 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -36,27 +34,39 @@ public class ReservationService {
       SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
       Date dateToFilter = format.parse(date);
 
-      return reservationRepository.findByDate(dateToFilter);
+      List<Reservation> reservations = reservationRepository.findByDate(dateToFilter);
+      if (reservations == null)
+        throw new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Reservation not found."
+        );
+      else
+        return reservations;
     } catch (Exception exception) {
       throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND,
-          "Reservation not found. " + exception
+              HttpStatus.BAD_REQUEST,
+              "Could not execute request." + exception
       );
     }
   }
 
 
-  public Reservation getReservationById(Long id) {
-    Reservation reservation = reservationRepository
-        .findById(id)
-        .orElse(null);
-    if (reservation == null)
+  public List<Reservation> getReservationByUserId(Long id) {
+    try {
+      List<Reservation> reservations = reservationRepository.findByUserId(id);
+      if (reservations == null)
+        throw new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "User not found."
+        );
+      else
+        return reservations;
+    } catch (Exception exception) {
       throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND,
-          "Reservation not found."
+              HttpStatus.BAD_REQUEST,
+              "Could not execute request. " + exception
       );
-    else
-      return reservation;
+    }
   }
 
   public void createReservation(Reservation reservationToCreate) {
@@ -100,7 +110,17 @@ public class ReservationService {
     else {
       try {
         reservation.updateReservationObject(updatedReservation);
-        reservationRepository.save(reservation);
+
+        List<Reservation> existingReservations = reservationRepository
+                .findByRoomAndDate(updatedReservation.getRoom(), updatedReservation.getDate());
+        boolean overlap = existingReservations.stream()
+                .anyMatch(existing -> doReservationsOverlap(existing, updatedReservation));
+        if (overlap) throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Time inserted overlaps an existing reservation."
+        );
+        else
+          reservationRepository.save(reservation);
       } catch (Exception e) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
