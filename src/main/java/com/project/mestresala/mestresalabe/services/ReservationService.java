@@ -113,6 +113,7 @@ public class ReservationService {
 
         List<Reservation> existingReservations = reservationRepository
                 .findByRoomAndDate(updatedReservation.getRoom(), updatedReservation.getDate());
+        existingReservations.removeIf(r -> r.getId().equals(updatedReservation.getId()));
         boolean overlap = existingReservations.stream()
                 .anyMatch(existing -> doReservationsOverlap(existing, updatedReservation));
         if (overlap) throw new ResponseStatusException(
@@ -124,7 +125,7 @@ public class ReservationService {
       } catch (Exception e) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
-            "All fields must not be null to update a Reservation object."
+            "Error: " + e
         );
       }
     }
