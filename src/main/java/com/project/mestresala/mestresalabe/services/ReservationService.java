@@ -8,10 +8,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class ReservationService {
@@ -60,7 +63,14 @@ public class ReservationService {
                 "User not found."
         );
       else
-        return reservations;
+        return reservations.stream()
+            .peek(reservation -> {
+              LocalDateTime ldt = LocalDateTime.ofInstant(reservation.getDate().toInstant(),
+                      ZoneId.of("America/Sao_Paulo"));
+              ldt = ldt.minusDays(1);
+              Date out = Date.from(ldt.atZone(ZoneId.of("America/Sao_Paulo")).toInstant());
+              reservation.setDate(out);
+            }).toList();
     } catch (Exception exception) {
       throw new ResponseStatusException(
               HttpStatus.BAD_REQUEST,
@@ -70,7 +80,7 @@ public class ReservationService {
   }
 
   public void createReservation(Reservation reservationToCreate) {
-    reservationToCreate.setDate(addOneDay(reservationToCreate.getDate()));
+    reservationToCreate.setDate(addDays(reservationToCreate.getDate(), 1));
     List<Reservation> existingReservations = reservationRepository
         .findByRoomAndDate(reservationToCreate.getRoom(), reservationToCreate.getDate());
     boolean overlap = existingReservations.stream()
@@ -83,11 +93,11 @@ public class ReservationService {
     else reservationRepository.save(reservationToCreate);
   }
 
-  private Date addOneDay(Date date)
+  private Date addDays(Date date, int days)
   {
     Calendar cal = Calendar.getInstance();
     cal.setTime(date);
-    cal.add(Calendar.DATE, 1);
+    cal.add(Calendar.DATE, days);
     return cal.getTime();
   }
 
@@ -109,6 +119,7 @@ public class ReservationService {
       );
     else {
       try {
+        updatedReservation.setDate(addDays(updatedReservation.getDate(), 1));
         reservation.updateReservationObject(updatedReservation);
 
         List<Reservation> existingReservations = reservationRepository
