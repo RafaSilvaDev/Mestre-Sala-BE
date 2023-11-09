@@ -82,27 +82,11 @@ public class AuthenticationController {
     this.userRepository.save(newUser);
   }
 
-  @Operation(summary = "Verify User token.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200"),
-      @ApiResponse(responseCode = "400", description = "Token is invalid or expired.",
-          content = @Content)})
-  @PostMapping("/verify")
-  @ResponseStatus(HttpStatus.OK)
-  public void verifyToken(@RequestBody String token) {
-    tokenService.isTokenValid(token);
-  }
-
-  @Operation(summary = "Get all users.", deprecated = true)
-  @GetMapping("/users")
-  public List<User> getUsers() {
-    return userRepository.findAll();
-  }
-
-  @Operation(summary = "Get a user by it's email.", deprecated = true)
+  @Operation(summary = "Get a user by it's email.")
   @GetMapping("/user/{email}")
   public Long getUserIdByEmail(@PathVariable(value = "email") UserEmailDTO data) {
     System.out.println("User -> " + data.email());
     return ((User) userRepository.findByEmail(data.email())).getId();
   }
+
 }
