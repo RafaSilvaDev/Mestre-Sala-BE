@@ -31,18 +31,12 @@ public class RoomService {
   }
 
   public void createRoom(Room roomToCreate) {
-    if (roomToCreate.getTitle() == null || roomToCreate.getTitle().isEmpty())
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Title must not be null to a Room object.");
-    if (roomToCreate.getLocation() == null || roomToCreate.getLocation().isEmpty())
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location must not be null to a Room object.");
-    if (roomToCreate.getDescription() == null || roomToCreate.getDescription().isEmpty())
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Description must not be null to a Room object.");
-
     roomRepository.save(roomToCreate);
   }
 
   public void deleteRoom(Long id) {
-    Room room = roomRepository.findById(id).orElse(null);
+    Room room = roomRepository.findById(id)
+        .orElse(null);
     if (room == null)
       throw new ResponseStatusException(
           HttpStatus.NOT_FOUND,
