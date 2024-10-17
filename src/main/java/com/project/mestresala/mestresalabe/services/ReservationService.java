@@ -80,7 +80,6 @@ public class ReservationService {
   }
 
   public void createReservation(Reservation reservationToCreate) {
-    reservationToCreate.setDate(addDays(reservationToCreate.getDate(), 1));
     List<Reservation> existingReservations = reservationRepository
         .findByRoomAndDate(reservationToCreate.getRoom(), reservationToCreate.getDate());
     boolean overlap = existingReservations.stream()
@@ -91,14 +90,6 @@ public class ReservationService {
         "Time inserted overlaps an existing reservation."
     );
     else reservationRepository.save(reservationToCreate);
-  }
-
-  private Date addDays(Date date, int days)
-  {
-    Calendar cal = Calendar.getInstance();
-    cal.setTime(date);
-    cal.add(Calendar.DATE, days);
-    return cal.getTime();
   }
 
   public void deleteReservationById(Long id) {
@@ -119,7 +110,6 @@ public class ReservationService {
       );
     else {
       try {
-        updatedReservation.setDate(addDays(updatedReservation.getDate(), 1));
         reservation.updateReservationObject(updatedReservation);
 
         List<Reservation> existingReservations = reservationRepository
